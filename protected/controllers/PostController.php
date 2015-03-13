@@ -117,10 +117,34 @@ class PostController extends Controller
 	 */
 	public function actionIndex()
 	{
+		/**
 		$dataProvider=new CActiveDataProvider('Post');
 		$this->render('index',array(
 			'dataProvider'=>$dataProvider,
 		));
+		*/
+		
+		$criteria = new CDbCriteria(array(
+			'condition' => 'status=' . Post::STATUS_PUBLISHED,
+			'order' => 'update_time DESC',
+			'with' => 'commentCount',
+		));
+		
+		if (isset($_GET['tag'])) {
+			$criteria->addSearchCondition('tags', $_GET['tag']);
+		}
+		
+		$dataProvider = new CActiveDataProvider('Post', array(
+			'pagination' => array(
+				'pageSize' => 5,
+			),
+			'criteria' => $criteria,
+		));
+		
+		$this->render('index', array(
+			'dataProvider' => $dataProvider,
+		));
+		
 	}
 
 	/**
@@ -147,10 +171,24 @@ class PostController extends Controller
 	 */
 	public function loadModel($id)
 	{
-		$model=Post::model()->findByPk($id);
-		if($model===null)
-			throw new CHttpException(404,'The requested page does not exist.');
-		return $model;
+		if ($id) {
+			
+			if(Yii::app()->user->isGuest) {
+				$condition = sprintf('status = %d OR status = %d', Post::STATUS_PUBLISHED, Post::STATUS_ARCHIVED);
+			} else {
+				$condition = '';
+			}
+			
+			$model = Post::model()->findByPk($id, $condition);
+			
+			if ($model === null) {
+				throw new CHttpException(404,'The requested page does not exist.');
+			}
+			
+			return $model;
+		}
+		
+		return null;
 	}
 
 	/**
