@@ -175,4 +175,12 @@ class Post extends CActiveRecord
 		parent::afterFind();
 		$this->_oldTags=$this->tags;
 	}
+	
+	protected function afterDelete()
+	{
+		parent::afterDelete();
+		
+		Comment::model()->deleteAll('post_id = ' . $this->id);
+		Tag::model()->updateFrequency($this->tags, '');
+	}
 }
