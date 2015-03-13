@@ -111,7 +111,9 @@ class User extends CActiveRecord
 	
 	public function validatePassword($password)
 	{
-		return CPasswordHelper::verifyPassword($password, $this->password);
+		$hash = CPasswordHelper::hashPassword($password);
+		
+		return CPasswordHelper::verifyPassword($password, $hash);
 	}
 	
 	public function hashPassword($password)
