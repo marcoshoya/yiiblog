@@ -127,4 +127,10 @@ class Comment extends CActiveRecord
 		
 		return false;
 	}
+	
+	public function approve()
+	{
+		$this->status=Comment::STATUS_APPROVED;
+		$this->update(array('status'));
+	}
 }
